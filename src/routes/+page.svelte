@@ -92,6 +92,5 @@
 	.text-stroke-count {
 		-webkit-text-stroke-width: 1.5px;
 		-webkit-text-stroke-color: #000;
-		font-weight: 900;
 	}
 </style>
