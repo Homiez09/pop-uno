@@ -32,7 +32,7 @@
 <svelte:body on:keydown={incrementCount} />
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<main
+<main 
 	bind:this={main}
 	class="no-select w-full h-screen flex flex-col items-center bg-transparent"
 	on:mousedown={incrementCount}
@@ -52,8 +52,14 @@
 	}
 
     .text-stroke-count {
-		-webkit-text-stroke-width: 3px;
+		-webkit-text-stroke-width: 0.15rem;
 		-webkit-text-stroke-color: #000;
         font-weight: 900;
 	}
+
+    @media (max-width: 640px) {
+        .text-stroke-count {
+            font-size: 3rem;
+        }
+    }
 </style>
