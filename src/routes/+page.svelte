@@ -21,7 +21,7 @@
 
 <svelte:head>
 	<title>UNO</title>
-	<meta name="title" content="POPYUT (Beta)" />
+	<meta name="title" content="POPUNO" />
 	<meta name="description" content="DOG" />
 	<meta
 		name="viewport"
