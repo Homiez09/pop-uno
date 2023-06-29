@@ -56,10 +56,4 @@
 		-webkit-text-stroke-color: #000;
         font-weight: 900;
 	}
-
-    @media (max-width: 640px) {
-        .text-stroke-count {
-            font-size: 3rem;
-        }
-    }
 </style>
