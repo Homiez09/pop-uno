@@ -38,9 +38,7 @@
 	on:mousedown={incrementCount}
 >
 	<img src="/uno.jpg" alt="uno" class="block fixed object-cover w-full h-full -z-10" />
-	<h1 class="text-stroke-title mt-8 text-8xl text-white rounded p-2 flex items-start">
-		POPUNO
-	</h1>
+    <img src="/title.png" alt="uno" class="mt-8 sm:w-8/12 md:w-2/4 lg:w-1/4" />
 	{#key $count}
 		<p class="text-stroke-count text-5xl text-white mt-1 p-2 drop-shadow-md" in:spin>
 			{$count.toLocaleString()}
@@ -51,12 +49,6 @@
 <style>
 	.no-select {
 		user-select: none;
-	}
-
-	.text-stroke-title {
-		-webkit-text-stroke-width: 3px;
-		-webkit-text-stroke-color: #000;
-        font-weight: 900;
 	}
 
     .text-stroke-count {
