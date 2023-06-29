@@ -52,7 +52,7 @@
 	}
 
     .text-stroke-count {
-		-webkit-text-stroke-width: 0.15rem;
+		-webkit-text-stroke-width: 0.1rem;
 		-webkit-text-stroke-color: #000;
         font-weight: 900;
 	}
