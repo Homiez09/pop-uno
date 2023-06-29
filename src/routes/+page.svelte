@@ -40,8 +40,8 @@
 	<img src="/uno.jpg" alt="uno" class="block fixed object-cover w-full h-full -z-10" />
     <img src="/title.png" alt="uno" class="mt-8 sm:w-8/12 md:w-2/4 lg:w-1/4" />
 	{#key $count}
-		<p class="text-stroke-count text-5xl text-white mt-1 p-2" in:spin>
-			{$count.toLocaleString()}
+		<p class="Prompt text-stroke-count text-5xl text-white mt-1 p-2" in:spin>
+			{$count}
 		</p>
 	{/key}
 </main>
