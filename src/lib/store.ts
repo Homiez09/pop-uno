@@ -1,3 +1,8 @@
 import { writable } from 'svelte/store';
+import { browser } from '$app/environment';
 
-export const count = writable(0);
+export const count = writable(+((browser && localStorage.getItem('count')) || '0'));
+
+count.subscribe((val) => {
+  if (browser) return (localStorage.count = `${val}`);
+});
