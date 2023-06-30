@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { count } from '../lib/store';
-	import { tweened } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
 
 	let countValue: number;
 	let main: HTMLElement;
-	let pps: number;
+	let countForSubmit = 0;
 
 	count.subscribe((value) => {
 		countValue = value;
@@ -13,6 +11,7 @@
 
 	const incrementCount = () => {
 		count.update((n) => n + 1);
+		countForSubmit++;
 	};
 
 	const spin = (node: Node) => {
@@ -22,6 +21,16 @@
 		};
 	};
 
+	const setSubmitCount = () => {
+		setInterval(() => {
+			if (countForSubmit === 0) return;
+			console.log("update: " + countForSubmit);
+			// code here
+			countForSubmit = 0;
+		}, 30000);
+	}
+
+	setSubmitCount();
 </script>
 
 <svelte:head>
