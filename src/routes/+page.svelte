@@ -1,30 +1,29 @@
 <script lang="ts">
 	import { count } from '$lib/store';
-	import { db } from '$lib/firebase';
-	import { getDoc, doc, setDoc } from "firebase/firestore";
-	import { auth } from '$lib/firebase';
-  	import { userStore } from 'sveltefire';
+	import PocketBase from 'pocketbase';
 	import { onMount } from 'svelte';
+
+	const pb = new PocketBase('https://pop-uno.pockethost.io');
 
 	let countValue: number;
 	let main: HTMLElement;
 	let countForSubmit = 0;
-  	let clicked = false;
+	let clicked = false;
 
 	count.subscribe((value) => {
 		countValue = value;
 	});
 
 	const incrementCount = () => {
-    if (clicked) return;
+		if (clicked) return;
 		count.update((n) => n + 1);
 		countForSubmit++;
-    clicked = true;
+		clicked = true;
 	};
 
-  const resetClicked = () => {
-    clicked = false;
-  }
+	const resetClicked = () => {
+		clicked = false;
+	};
 
 	const spin = (node: Node) => {
 		return {
@@ -34,33 +33,25 @@
 	};
 
 	const setSubmitCount = () => {
-		setInterval(async() => {
+		setInterval(async () => {
 			if (countForSubmit === 0) return;
 			console.log('update: ' + countForSubmit);
-			
-			// update count in firestore by adding countForSubmit
-			const docRef = doc(db, "count", "count");
-			const docSnap = await getDoc(docRef);
-			if (docSnap.exists()) {
-				await setDoc(docRef, {
-					count: docSnap.data().count + countForSubmit
-				}).then(() => { console.log('updated'); });
-			} else {
-				await setDoc(docRef, {
-					count: countForSubmit
-				});
-			}
-		
-			console.log(docSnap.data());
+			// example update data
+			const data = {
+				count: 1
+			};
 
+			const record = await pb.collection('records').update('6vudsot1eqffv7z',data);
 			countForSubmit = 0;
 		}, 30000);
 	};
 
 	setSubmitCount();
+
+	onMount(async () => {});
 </script>
 
-<svelte:body on:keydown={incrementCount} on:keyup={resetClicked}/>
+<svelte:body on:keydown={incrementCount} on:keyup={resetClicked} />
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <main
@@ -69,7 +60,7 @@
 	on:mousedown={incrementCount}
 	on:mouseup={resetClicked}
 >
-	<img src="/uno.jpg" alt="uno" class="block fixed object-cover w-full h-full -z-10" />
+	<img src="/uxno.jpg" alt="uno" class="block fixed object-cover w-full h-full -z-10" />
 	<img src="/title.png" alt="uno" class="mt-8 sm:w-8/12 md:w-2/4 lg:w-1/4" />
 	{#key $count}
 		<p class="Prompt text-stroke-count text-5xl text-white mt-1 p-2" in:spin>
@@ -86,6 +77,11 @@
 	</p>
 </main>
 
+<!-- @firebase/firestore: Firestore (10.1.0): Could not reach Cloud Firestore backend. Connection failed 1 times. Most recent error: FirebaseError: [code=permission-denied]: Permission denied: Consumer 'project:undefined' has been suspended.
+This typically indicates that your device does not have a healthy Internet connection at the moment. The client will operate in offline mode until it is able to successfully connect to the backend. -->
+
+<!-- +page.svelte:53 Uncaught (in promise) FirebaseError: Failed to get document because the client is offline. -->
+
 <style>
 	.no-select {
 		user-select: none;
@@ -96,10 +92,3 @@
 		-webkit-text-stroke-color: #000;
 	}
 </style>
-
-
-<!-- @firebase/firestore: Firestore (10.1.0): Could not reach Cloud Firestore backend. Connection failed 1 times. Most recent error: FirebaseError: [code=permission-denied]: Permission denied: Consumer 'project:undefined' has been suspended.
-This typically indicates that your device does not have a healthy Internet connection at the moment. The client will operate in offline mode until it is able to successfully connect to the backend. -->
-
-
-<!-- +page.svelte:53 Uncaught (in promise) FirebaseError: Failed to get document because the client is offline. -->
