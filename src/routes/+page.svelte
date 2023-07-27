@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { count } from '$lib/store';
+	import { count, tempCount, totalCount } from '$lib/stores/count';
 	import PocketBase from 'pocketbase';
 	import { onMount } from 'svelte';
 
@@ -35,20 +35,34 @@
 	const setSubmitCount = () => {
 		setInterval(async () => {
 			if (countForSubmit === 0) return;
-			console.log('update: ' + countForSubmit);
-			// example update data
+
 			const data = {
-				count: 1
+				count: countForSubmit
 			};
 
-			const record = await pb.collection('records').update('6vudsot1eqffv7z',data);
+			await pb.collection('records').create(data).then((res) => {
+					console.log('update: ' + countForSubmit);
+					getTotalCount();
+				});
 			countForSubmit = 0;
 		}, 30000);
 	};
 
-	setSubmitCount();
+	const getTotalCount = () => {
+		pb.collection('records')
+			.getList()
+			.then((res) => {
+				const records = res.items;
+				let countTotal = records.reduce((acc: number, cur: any) => acc + cur.count, 0);
+				totalCount.set(countTotal.toString());
+				console.log(countTotal);
+			});
+	};
 
-	onMount(async () => {});
+	onMount(() => {
+		getTotalCount();
+		setSubmitCount();
+	});
 </script>
 
 <svelte:body on:keydown={incrementCount} on:keyup={resetClicked} />
@@ -60,8 +74,9 @@
 	on:mousedown={incrementCount}
 	on:mouseup={resetClicked}
 >
-	<img src="/uxno.jpg" alt="uno" class="block fixed object-cover w-full h-full -z-10" />
+	<img src="/uno.jpg" alt="uno" class="block fixed object-cover w-full h-full -z-10 bg-black" />
 	<img src="/title.png" alt="uno" class="mt-8 sm:w-8/12 md:w-2/4 lg:w-1/4" />
+
 	{#key $count}
 		<p class="Prompt text-stroke-count text-5xl text-white mt-1 p-2" in:spin>
 			{$count.toLocaleString()}
@@ -69,10 +84,10 @@
 	{/key}
 
 	<p class="noselect text-3xl border-black text-white mt-8 bg-black rounded p-2">
-		Total: {Math.round(1).toLocaleString()}
+		Total: {(parseInt($totalCount) + countForSubmit).toLocaleString()}
 		<span class="text-xs ml-1 text-green-400">
 			<!-- {pps !== undefined ? `${abbreviateNumber(pps)} PPS` : '...'} -->
-			99 ppsx
+			99 pps
 		</span>
 	</p>
 </main>
