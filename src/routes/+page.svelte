@@ -4,20 +4,14 @@
 	import { onMount } from 'svelte';
 
 	const pb = new PocketBase('https://pop-uno.pockethost.io');
-
-	let countValue: number;
+	
 	let main: HTMLElement;
-	let countForSubmit = 0;
 	let clicked = false;
-
-	count.subscribe((value) => {
-		countValue = value;
-	});
 
 	const incrementCount = () => {
 		if (clicked) return;
 		count.update((n) => n + 1);
-		countForSubmit++;
+		tempCount.update((n) => n + 1);
 		clicked = true;
 	};
 
@@ -32,26 +26,30 @@
 		};
 	};
 
-	const setSubmitCount = () => {
+	const createCountRecord = () => {
 		setInterval(async () => {
-			if (countForSubmit === 0) return;
+			if ($tempCount < 500) return;
 
 			const data = {
-				count: countForSubmit
+				count: tempCount,
 			};
 
-			await pb.collection('records').create(data).then((res) => {
-					console.log('update: ' + countForSubmit);
+			await pb
+				.collection('records')
+				.create(data)
+				.then((res) => {
+					console.log('update: ' + $tempCount);
+					$tempCount = 0;
 					getTotalCount();
 				});
-			countForSubmit = 0;
-		}, 30000);
+		}, 60000); // 1 minutes
 	};
 
 	const getTotalCount = () => {
 		pb.collection('records')
-			.getList()
+			.getList(1, 999999999)
 			.then((res) => {
+				const totalPage = res.totalPages;
 				const records = res.items;
 				let countTotal = records.reduce((acc: number, cur: any) => acc + cur.count, 0);
 				totalCount.set(countTotal.toString());
@@ -61,8 +59,9 @@
 
 	onMount(() => {
 		getTotalCount();
-		setSubmitCount();
+		createCountRecord();
 	});
+
 </script>
 
 <svelte:body on:keydown={incrementCount} on:keyup={resetClicked} />
@@ -84,7 +83,7 @@
 	{/key}
 
 	<p class="noselect text-3xl border-black text-white mt-8 bg-black rounded p-2">
-		Total: {(parseInt($totalCount) + countForSubmit).toLocaleString()}
+		Total: {(parseInt($totalCount) + $tempCount).toLocaleString()}
 		<span class="text-xs ml-1 text-green-400">
 			<!-- {pps !== undefined ? `${abbreviateNumber(pps)} PPS` : '...'} -->
 			99 pps
