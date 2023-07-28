@@ -31,7 +31,7 @@
 			if ($tempCount < 500) return;
 
 			const data = {
-				count: tempCount,
+				count: $tempCount,
 			};
 
 			await pb
