@@ -9,7 +9,9 @@
 	let clicked = false;
 
 	const incrementCount = () => {
+		const popAudio : HTMLAudioElement = new Audio('/effects/pop.mp3');;
 		if (clicked) return;
+		popAudio.play();
 		count.update((n) => n + 1);
 		tempCount.update((n) => n + 1);
 		clicked = true;
@@ -31,7 +33,7 @@
 			if ($tempCount < 500) return;
 
 			const data = {
-				count: tempCount,
+				count: $tempCount,
 			};
 
 			await pb
@@ -41,7 +43,9 @@
 					console.log('update: ' + $tempCount);
 					$tempCount = 0;
 					getTotalCount();
-				});
+				}).catch((err) => {
+					//console.log(err);
+				})
 		}, 60000); // 1 minutes
 	};
 
@@ -49,7 +53,7 @@
 		pb.collection('records')
 			.getList(1, 999999999)
 			.then((res) => {
-				const totalPage = res.totalPages;
+				// const totalPage = res.totalPages;
 				const records = res.items;
 				let countTotal = records.reduce((acc: number, cur: any) => acc + cur.count, 0);
 				totalCount.set(countTotal.toString());
@@ -64,7 +68,7 @@
 
 </script>
 
-<svelte:body on:keydown={incrementCount} on:keyup={resetClicked} />
+<svelte:body on:keydown={incrementCount} on:keyup={resetClicked}/>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <main
