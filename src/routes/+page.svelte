@@ -2,16 +2,23 @@
 	import { count, tempCount, totalCount } from '$lib/stores/count';
 	import PocketBase from 'pocketbase';
 	import { onMount } from 'svelte';
+	import {Howl} from 'howler';
+	import type { DataInterface } from '$lib/types/DataInterface';
+
 
 	const pb = new PocketBase('https://pop-uno.pockethost.io');
 	
 	let main: HTMLElement;
-	let clicked = false;
+	let clicked: boolean = false;
+	let pps: number = 0;
+
+	const audio = new Howl({
+      src: ['/effects/pop.mp3']
+    });
 
 	const incrementCount = () => {
-		const popAudio : HTMLAudioElement = new Audio('/effects/pop.mp3');;
 		if (clicked) return;
-		popAudio.play();
+		audio.play();
 		count.update((n) => n + 1);
 		tempCount.update((n) => n + 1);
 		clicked = true;
@@ -28,42 +35,44 @@
 		};
 	};
 
-	const createCountRecord = () => {
+	const updateCountRecord = () => {
 		setInterval(async () => {
-			if ($tempCount < 500) return;
+			getTotalCount() 
 
-			const data = {
-				count: $tempCount,
-			};
+			if (!$tempCount) return;
+			await pb.collection('records').update<DataInterface>('r68rzn7phg2oplq', {
+				"name": "uno",
+				"count+" : $tempCount
+			}).then(
+				() => {
+					tempCount.set(0);
+				}
+			)
 
-			await pb
-				.collection('records')
-				.create(data)
-				.then((res) => {
-					console.log('update: ' + $tempCount);
-					$tempCount = 0;
-					getTotalCount();
-				}).catch((err) => {
-					//console.log(err);
-				})
-		}, 60000); // 1 minutes
+		}, 1000);
 	};
 
-	const getTotalCount = () => {
-		pb.collection('records')
-			.getList(1, 999999999)
-			.then((res) => {
-				// const totalPage = res.totalPages;
-				const records = res.items;
-				let countTotal = records.reduce((acc: number, cur: any) => acc + cur.count, 0);
-				totalCount.set(countTotal.toString());
-				console.log(countTotal);
-			});
+	const getTotalCount = async () => {
+		let record = await pb.collection('records').getOne("r68rzn7phg2oplq");
+			pps = record.count - parseInt($totalCount);
+			let countTotal = record.count;
+			totalCount.set(countTotal.toString());
 	};
 
-	onMount(() => {
-		getTotalCount();
-		createCountRecord();
+	const abbreviateNumber = (pps: number) => {
+		const SI_SYMBOL = ['', 'k', 'M', 'G', 'T', 'P', 'E'];
+		const tier = (Math.log10(pps) / 3) | 0;
+		if (tier === 0) return pps;
+		const suffix = SI_SYMBOL[tier];
+		const scale = Math.pow(10, tier * 3);
+		const scaled = pps / scale;
+		return scaled.toFixed(1) + suffix;
+	}
+
+	onMount(async () => {
+		updateCountRecord();
+		await pb.autoCancellation(false);
+	
 	});
 
 </script>
@@ -89,8 +98,7 @@
 	<p class="noselect text-3xl border-black text-white mt-8 bg-black rounded p-2">
 		Total: {(parseInt($totalCount) + $tempCount).toLocaleString()}
 		<span class="text-xs ml-1 text-green-400">
-			<!-- {pps !== undefined ? `${abbreviateNumber(pps)} PPS` : '...'} -->
-			99 pps
+			{pps !== undefined ? `+${abbreviateNumber(pps)} PPS` : '...'}
 		</span>
 	</p>
 </main>
