@@ -42,8 +42,8 @@
 	};
 
 	const updateCountRecord = () => {
-		getTotalCount();
 		setInterval(async () => {
+			getTotalCount();
 			if (!$tempCount) return;
 			await pb.collection('records').update<DataInterface>('r68rzn7phg2oplq', {
 				"name": "uno",
