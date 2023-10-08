@@ -32,6 +32,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@types/howler": "^2.2.9",
+		"howler": "^2.2.4",
 		"pocketbase": "^0.15.3"
 	}
 }
